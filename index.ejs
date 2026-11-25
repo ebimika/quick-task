@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>タスク管理処</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f7f6; color: #333; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    h1 { text-align: center; color: #2c3e50; }
+    .form-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    input[type="text"], textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    button.add-btn { width: 100%; padding: 10px; background: #3498db; color: #fff; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+    button.add-btn:hover { background: #2980b9; }
+    .task-list { list-style: none; padding: 0; }
+    .task-item { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .task-item.completed .task-title { text-decoration: line-through; color: #999; }
+    .badge { font-size: 12px; padding: 3px 8px; border-radius: 12px; color: #fff; margin-right: 8px; }
+    .badge-high { background: #e74c3c; }
+    .badge-mid { background: #f39c12; }
+    .badge-low { background: #2ecc71; }
+    .task-memo { font-size: 14px; color: #666; margin-top: 5px; white-space: pre-wrap; }
+    .actions { display: flex; gap: 5px; }
+    .btn-sm { padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; color: #fff; font-size: 12px; }
+    .btn-toggle { background: #27ae60; }
+    .btn-delete { background: #e74c3c; }
+  </style>
+</head>
+<body>
+  <h1>📝タスクをメモしよう！</h1>
+
+  <div class="form-box">
+    <form action="/add" method="POST">
+      <input type="text" name="title" placeholder="タスク名を入力（必須）" required>
+      <textarea name="memo" rows="2" placeholder="詳細なメモ（任意）"></textarea>
+      <select name="priority">
+        <option value="高">優先度：高</option>
+        <option value="中" selected>優先度：中</option>
+        <option value="低">優先度：低</option>
+      </select>
+      <button type="submit" class="add-btn">上記のタスクを追加する</button>
+    </form>
+  </div>
+
+  <ul class="task-list">
+    <% tasks.forEach(function(task) { %>
+      <%
+        let badgeClass = 'badge-mid';
+        if (task.priority === '高') badgeClass = 'badge-high';
+        if (task.priority === '低') badgeClass = 'badge-low';
+      %>
+      <li class="task-item <%= task.completed ? 'completed' : '' %>">
+        <div>
+          <div>
+            <span class="badge <%= badgeClass %>"><%= task.priority %></span>
+            <strong class="task-title"><%= task.title %></strong>
+          </div>
+          <% if (task.memo) { %>
+            <div class="task-memo"><%= task.memo %></div>
+          <% } %>
+          <small style="color: #aaa;">作成日: <%= task.createdAt %></small>
+        </div>
+        <div class="actions">
+          <form action="/toggle/<%= task.id %>" method="POST">
+            <button type="submit" class="btn-sm btn-toggle"><%= task.completed ? '戻す' : '完了！' %></button>
+          </form>
+          <form action="/delete/<%= task.id %>" method="POST">
+            <button type="submit" class="btn-sm btn-delete">このタスクを削除</button>
+          </form>
+        </div>
+      </li>
+    <% }); %>
+  </ul>
+</body>
+</html>
